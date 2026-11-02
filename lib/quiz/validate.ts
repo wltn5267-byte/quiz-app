@@ -1,7 +1,5 @@
 import type { Question, QuizFile } from "./types";
 
-export const MAX_FILE_BYTES = 1024 * 1024;
-
 export type ValidationResult =
   | { ok: true; quiz: QuizFile }
   | { ok: false; errors: string[] };
@@ -11,14 +9,10 @@ function isFilledString(value: unknown): value is string {
 }
 
 /**
- * 업로드한 문제 파일의 내용이 PRD.md의 규칙에 맞는지 검사합니다.
- * 오류 메시지는 화면에 그대로 보여줄 수 있는 쉬운 한국어로 만듭니다.
+ * 문제지 JSON 파일의 내용이 PRD.md의 규칙에 맞는지 검사합니다.
+ * 오류 메시지는 어떤 파일의 몇 번 문항이 잘못됐는지 쉽게 알 수 있는 한국어로 만듭니다.
  */
-export function validateQuizFile(text: string, sizeInBytes: number): ValidationResult {
-  if (sizeInBytes > MAX_FILE_BYTES) {
-    return { ok: false, errors: ["파일이 너무 큽니다. 1MB 이하의 파일을 올려주세요."] };
-  }
-
+export function validateQuizFile(text: string): ValidationResult {
   let data: unknown;
   try {
     data = JSON.parse(text.replace(/^﻿/, ""));
@@ -29,15 +23,24 @@ export function validateQuizFile(text: string, sizeInBytes: number): ValidationR
     };
   }
 
-  const questions = (data as { questions?: unknown } | null)?.questions;
-  if (typeof data !== "object" || data === null || !Array.isArray(questions)) {
-    return { ok: false, errors: ['파일에 문항 목록("questions")이 없습니다.'] };
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    return { ok: false, errors: ["문제지 파일의 형식이 올바르지 않습니다."] };
   }
-  if (questions.length === 0) {
-    return { ok: false, errors: ["파일에 문항이 하나도 없습니다."] };
-  }
+  const { title, questions } = data as { title?: unknown; questions?: unknown };
 
   const errors: string[] = [];
+  if (!isFilledString(title)) {
+    errors.push('문제지 제목("title")이 없거나 비어 있습니다.');
+  }
+  if (!Array.isArray(questions)) {
+    errors.push('파일에 문항 목록("questions")이 없습니다.');
+    return { ok: false, errors };
+  }
+  if (questions.length === 0) {
+    errors.push("파일에 문항이 하나도 없습니다.");
+    return { ok: false, errors };
+  }
+
   questions.forEach((item: unknown, index) => {
     const n = index + 1;
     if (typeof item !== "object" || item === null) {
@@ -71,6 +74,7 @@ export function validateQuizFile(text: string, sizeInBytes: number): ValidationR
   }
 
   const quiz: QuizFile = {
+    title: title as string,
     questions: (questions as Question[]).map((q) => ({
       question: q.question,
       options: [q.options[0], q.options[1], q.options[2], q.options[3]],

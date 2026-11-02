@@ -6,10 +6,10 @@ import { formatScore } from "@/lib/quiz/score";
 type Props = {
   result: QuizResult;
   onRetry: () => void;
-  onNewFile: () => void;
+  onBackToList: () => void;
 };
 
-export default function ResultScreen({ result, onRetry, onNewFile }: Props) {
+export default function ResultScreen({ result, onRetry, onBackToList }: Props) {
   return (
     <section className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-6 text-center">
@@ -68,10 +68,10 @@ export default function ResultScreen({ result, onRetry, onNewFile }: Props) {
         </button>
         <button
           type="button"
-          onClick={onNewFile}
+          onClick={onBackToList}
           className="h-14 flex-1 rounded-xl border border-border bg-card text-lg font-medium hover:bg-hover"
         >
-          다른 파일 올리기
+          문제지 목록으로
         </button>
       </div>
     </section>

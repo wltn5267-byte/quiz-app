@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 프로젝트 개요
 
-선생님이 준 JSON 문제 파일을 업로드해 4지선다 문제를 모두 푼 뒤, 한 번에 채점해 점수·문항별 정오·해설을 보여주는 교육용 웹앱입니다.
+학생이 `question-papers` 폴더에 미리 준비된 문제지를 목록에서 골라 4지선다 문제를 모두 푼 뒤, 한 번에 채점해 점수·문항별 정오·해설을 보여주는 교육용 웹앱입니다. 학생은 파일을 올리지 않습니다.
 
-- 요구사항의 기준 문서는 [PRD.md](PRD.md)입니다. 작업 전에 반드시 읽습니다.
+- 요구사항의 기준 문서는 [PRD.md](PRD.md)입니다. 작업 전에 반드시 읽습니다. PRD.md 끝의 "변경 기록"에 초기 버전(학생 파일 업로드)과 현재 버전(목록 선택)의 차이가 있습니다.
 - 기술 구성: Next.js + TypeScript, Vercel 배포, PC와 휴대폰 모두 지원
-- 현재 상태: 1일차 앱을 만들었고, 이 컴퓨터에서만 실행해 확인했습니다. 배포와 GitHub 업로드는 하지 않았고, Git 저장소도 아직 없습니다.
+- 현재 상태: 1일차 앱을 목록 선택 방식으로 바꿨고, 이 컴퓨터에서만 실행해 확인했습니다. 배포와 GitHub 업로드는 하지 않았습니다. Git 저장소는 이 컴퓨터에만 있습니다(첫 커밋 `24942ef`는 업로드 방식인 초기 버전).
 - 확인된 작업 환경: Windows 11, Node.js v26.13.0, npm 11.20.0, Git 2.56.0, Next.js 16.4.3 (Turbopack, `cacheComponents` 켜짐)
 - 이 Next.js 버전은 예전 버전과 다른 점이 있습니다. 코드를 쓰기 전에 [AGENTS.md](AGENTS.md)의 안내대로 `node_modules/next/dist/docs/`를 확인합니다. AGENTS.md는 `next dev`가 다시 써 넣는 파일이므로 직접 고치지 않습니다.
 
@@ -27,21 +27,23 @@ npm run build    # 배포용 빌드 확인
 
 ## 구조
 
-- 화면은 주소 하나(`app/page.tsx`)에서 바뀝니다. [components/quiz/QuizApp.tsx](components/quiz/QuizApp.tsx)가 단계(`upload → ready → solving → result`)와 고른 답을 기억하고, 단계마다 `UploadScreen`, `ReadyScreen`, `QuestionScreen`, `ResultScreen` 중 하나를 보여줍니다. 내용은 저장하지 않으므로 새로고침하면 처음으로 돌아갑니다.
+- `app/page.tsx`(서버 쪽)가 `loadQuestionPapers()`로 `question-papers/*.json`을 읽어 검사한 뒤, 문제지 목록을 [components/quiz/QuizApp.tsx](components/quiz/QuizApp.tsx)에 넘깁니다. 파일 읽기는 빌드할 때 미리 실행되므로, 배포본에서 문제지를 바꾸려면 다시 빌드·배포해야 합니다. 개발용 실행에서는 새로고침하면 바로 반영됩니다.
+- `QuizApp`이 단계(`list → ready → solving → result`)와 고른 답을 기억하고, 단계마다 `PaperListScreen`, `ReadyScreen`, `QuestionScreen`, `ResultScreen` 중 하나를 보여줍니다. 내용은 저장하지 않으므로 새로고침하면 목록으로 돌아갑니다.
 - 화면과 상관없는 규칙은 `lib/quiz/`에 따로 있습니다. 2일차에도 그대로 다시 씁니다.
-  - `validate.ts`: 업로드 파일 검사. 화면에 그대로 보여줄 한국어 오류 문구를 만듭니다.
+  - `papers.ts`: 폴더 읽기(`loadQuestionPapers`)와 파일 이름 순서 정렬·검사(`parseQuestionPapers`). 잘못된 파일은 목록에서 빼고 서버 콘솔에 이유를 남깁니다. 파일 경로는 `join(process.cwd(), "question-papers", …)`처럼 폴더를 고정해서 씁니다. 경로를 변수로 받으면 빌드할 때 프로젝트 전체를 묶는다는 경고가 납니다.
+  - `validate.ts`: 문제지 한 개의 형식 검사(title 포함). 한국어 오류 문구를 만듭니다.
   - `score.ts`: 채점과 점수 계산(소수 첫째 자리 반올림), 점수 표시 형식
-  - `types.ts`: 문항 형식
-- 파일은 브라우저 안에서만 읽고, 서버로 보내지 않습니다.
+  - `types.ts`: 문항·문제지 형식
+- 정답이 들어 있는 문제지 내용이 그대로 브라우저로 전달됩니다. PRD에 따라 정답을 숨기는 보호 기능은 만들지 않습니다.
 - 색은 `app/globals.css`의 이름 붙인 색(`primary`, `muted`, `danger` 등)을 씁니다. 어두운 화면 설정도 지원합니다.
-- `sample-questions.json`은 업로드 시험용입니다. 앱 안에 넣거나 자동으로 불러오지 않습니다. `validate.test.ts`가 이 파일을 읽어 통과하는지 확인합니다.
+- 확인용으로 `question-papers`에 임의의 문제지나 문항을 추가하지 않습니다. 여러 문제지 동작은 `papers.test.ts`가 점검 안에서만 만든 내용으로 확인합니다.
 
 ## 1일차와 2일차 구분
 
-- **1일차 (지금 만들 것):** JSON 업로드, 문항 표시, 한 문제씩 4지선다 풀이, 모든 문항 완료 후 채점·점수·정오·해설 표시, 로컬 실행, Vercel 배포
+- **1일차 (지금 만들 것):** `question-papers` 문제지 목록 표시·선택, 문항 표시, 한 문제씩 4지선다 풀이, 모든 문항 완료 후 채점·점수·정오·해설 표시, 로컬 실행, Vercel 배포
 - **2일차 (나중에 추가할 것):** 교사 Google 로그인과 학생 이름으로 입장, Azure AI 문제 생성, 문제 저장·공개, Firestore 결과 저장, 교사용 점수 조회
 - 1일차에는 로그인, AI, DB를 구현하지 않습니다. 2일차 기능을 붙이기 쉬운 구조로만 만들고, 미래 기능을 미리 만들지 않습니다.
-- 문제 파일 형식, 풀이 규칙, 점수 계산, 파일 검증 규칙은 PRD.md의 "문제 파일"과 "결정 사항 (1일차)"을 그대로 따릅니다. 특히 다음을 지킵니다.
+- 문제지 파일 형식, 풀이 규칙, 점수 계산, 파일 검사 규칙은 PRD.md의 "문제지 파일"과 "결정 사항 (1일차)"을 그대로 따릅니다. 특히 다음을 지킵니다.
   - 풀이 중에는 정답 여부·점수·해설을 보여주지 않습니다.
   - `correctAnswer`는 1부터 셉니다. 1이 `options`의 첫 번째 보기입니다.
 

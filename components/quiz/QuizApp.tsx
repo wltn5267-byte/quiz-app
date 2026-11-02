@@ -1,59 +1,67 @@
 "use client";
 
 import { useState } from "react";
-import type { Answer, QuizFile } from "@/lib/quiz/types";
+import type { Answer, QuestionPaper } from "@/lib/quiz/types";
 import { gradeQuiz, type QuizResult } from "@/lib/quiz/score";
-import UploadScreen from "./UploadScreen";
+import PaperListScreen from "./PaperListScreen";
 import ReadyScreen from "./ReadyScreen";
 import QuestionScreen from "./QuestionScreen";
 import ResultScreen from "./ResultScreen";
 
 type Step =
-  | { name: "upload" }
-  | { name: "ready"; quiz: QuizFile; fileName: string }
-  | { name: "solving"; quiz: QuizFile; fileName: string; index: number; answers: Answer[] }
-  | { name: "result"; quiz: QuizFile; fileName: string; result: QuizResult };
+  | { name: "list" }
+  | { name: "ready"; paper: QuestionPaper }
+  | { name: "solving"; paper: QuestionPaper; index: number; answers: Answer[] }
+  | { name: "result"; paper: QuestionPaper; result: QuizResult };
 
-/** 파일 올리기 → 문항 확인 → 풀이 → 결과 순서로 화면을 바꿉니다. 내용은 저장하지 않습니다. */
-export default function QuizApp() {
-  const [step, setStep] = useState<Step>({ name: "upload" });
+type Props = {
+  papers: QuestionPaper[];
+};
 
-  function startSolving(quiz: QuizFile, fileName: string) {
+/** 문제지 목록 → 문항 확인 → 풀이 → 결과 순서로 화면을 바꿉니다. 내용은 저장하지 않습니다. */
+export default function QuizApp({ papers }: Props) {
+  const [step, setStep] = useState<Step>({ name: "list" });
+
+  function startSolving(paper: QuestionPaper) {
     setStep({
       name: "solving",
-      quiz,
-      fileName,
+      paper,
       index: 0,
-      answers: quiz.questions.map(() => null),
+      answers: paper.questions.map(() => null),
     });
     window.scrollTo({ top: 0 });
   }
 
-  function goToUpload() {
-    setStep({ name: "upload" });
+  function goToList() {
+    setStep({ name: "list" });
     window.scrollTo({ top: 0 });
   }
 
   switch (step.name) {
-    case "upload":
+    case "list":
       return (
-        <UploadScreen
-          onLoaded={(quiz, fileName) => setStep({ name: "ready", quiz, fileName })}
+        <PaperListScreen
+          papers={papers}
+          onSelect={(paper) => {
+            setStep({ name: "ready", paper });
+            window.scrollTo({ top: 0 });
+          }}
         />
       );
 
     case "ready":
       return (
         <ReadyScreen
-          fileName={step.fileName}
-          questionCount={step.quiz.questions.length}
-          onStart={() => startSolving(step.quiz, step.fileName)}
-          onChangeFile={goToUpload}
+          title={step.paper.title}
+          questionCount={step.paper.questions.length}
+          onStart={() => startSolving(step.paper)}
+          onBackToList={goToList}
         />
       );
 
     case "solving": {
-      const { quiz, index, answers } = step;
+      const { paper, index, answers } = step;
+      const questions = paper.questions;
       const move = (to: number) => {
         setStep({ ...step, index: to });
         window.scrollTo({ top: 0 });
@@ -61,9 +69,9 @@ export default function QuizApp() {
       return (
         <QuestionScreen
           key={index}
-          question={quiz.questions[index]}
+          question={questions[index]}
           index={index}
-          total={quiz.questions.length}
+          total={questions.length}
           chosen={answers[index]}
           onChoose={(answer) => {
             const next = [...answers];
@@ -71,15 +79,10 @@ export default function QuizApp() {
             setStep({ ...step, answers: next });
           }}
           onPrev={() => move(Math.max(0, index - 1))}
-          onNext={() => move(Math.min(quiz.questions.length - 1, index + 1))}
+          onNext={() => move(Math.min(questions.length - 1, index + 1))}
           onSubmit={() => {
             if (answers.some((a) => a === null)) return;
-            setStep({
-              name: "result",
-              quiz,
-              fileName: step.fileName,
-              result: gradeQuiz(quiz.questions, answers),
-            });
+            setStep({ name: "result", paper, result: gradeQuiz(questions, answers) });
             window.scrollTo({ top: 0 });
           }}
         />
@@ -90,8 +93,8 @@ export default function QuizApp() {
       return (
         <ResultScreen
           result={step.result}
-          onRetry={() => startSolving(step.quiz, step.fileName)}
-          onNewFile={goToUpload}
+          onRetry={() => startSolving(step.paper)}
+          onBackToList={goToList}
         />
       );
   }

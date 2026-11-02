@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { MAX_FILE_BYTES, validateQuizFile } from "./validate";
+import { validateQuizFile } from "./validate";
 
 const validQuestion = {
   question: "1 + 1은?",
@@ -11,51 +11,54 @@ const validQuestion = {
 };
 
 function check(data: unknown) {
-  const text = JSON.stringify(data);
-  return validateQuizFile(text, text.length);
+  return validateQuizFile(JSON.stringify(data));
 }
 
 describe("validateQuizFile", () => {
-  it("예시 파일 sample-questions.json의 10문항을 그대로 받아들인다", () => {
-    const text = readFileSync(join(process.cwd(), "sample-questions.json"), "utf8");
-    const result = validateQuizFile(text, Buffer.byteLength(text));
+  it("question-papers/sample-questions.json의 제목과 10문항을 그대로 받아들인다", () => {
+    const text = readFileSync(
+      join(process.cwd(), "question-papers", "sample-questions.json"),
+      "utf8",
+    );
+    const result = validateQuizFile(text);
     expect(result.ok).toBe(true);
     if (result.ok) {
+      expect(result.quiz.title).toBe("중학교 정보과목");
       expect(result.quiz.questions).toHaveLength(10);
       expect(result.quiz.questions[0].correctAnswer).toBe(4);
     }
   });
 
   it("앞에 BOM이 붙은 파일도 읽는다", () => {
-    const text = "﻿" + JSON.stringify({ questions: [validQuestion] });
-    expect(validateQuizFile(text, text.length).ok).toBe(true);
-  });
-
-  it("1MB를 넘는 파일은 거부한다", () => {
-    const text = JSON.stringify({ questions: [validQuestion] });
-    expect(validateQuizFile(text, MAX_FILE_BYTES + 1)).toEqual({
-      ok: false,
-      errors: ["파일이 너무 큽니다. 1MB 이하의 파일을 올려주세요."],
-    });
+    const text = "﻿" + JSON.stringify({ title: "제목", questions: [validQuestion] });
+    expect(validateQuizFile(text).ok).toBe(true);
   });
 
   it("JSON 문법 오류를 알려준다", () => {
-    const result = validateQuizFile("{ questions: [", 14);
-    expect(result).toEqual({
+    expect(validateQuizFile("{ questions: [")).toEqual({
       ok: false,
       errors: ["파일 내용을 읽을 수 없습니다. 올바른 JSON 문제 파일인지 확인해주세요."],
     });
   });
 
+  it("제목(title)이 없거나 비어 있으면 거부한다", () => {
+    for (const title of [undefined, "", "  ", 3]) {
+      expect(check({ title, questions: [validQuestion] })).toEqual({
+        ok: false,
+        errors: ['문제지 제목("title")이 없거나 비어 있습니다.'],
+      });
+    }
+  });
+
   it("questions가 없거나 배열이 아니면 거부한다", () => {
-    expect(check({})).toMatchObject({ ok: false });
-    expect(check({ questions: "abc" })).toMatchObject({ ok: false });
+    expect(check({ title: "제목" })).toMatchObject({ ok: false });
+    expect(check({ title: "제목", questions: "abc" })).toMatchObject({ ok: false });
     expect(check([validQuestion])).toMatchObject({ ok: false });
     expect(check(null)).toMatchObject({ ok: false });
   });
 
   it("문항이 하나도 없으면 거부한다", () => {
-    expect(check({ questions: [] })).toEqual({
+    expect(check({ title: "제목", questions: [] })).toEqual({
       ok: false,
       errors: ["파일에 문항이 하나도 없습니다."],
     });
@@ -63,6 +66,7 @@ describe("validateQuizFile", () => {
 
   it("보기가 4개가 아니면 몇 번 문항인지 알려준다", () => {
     const result = check({
+      title: "제목",
       questions: [validQuestion, { ...validQuestion, options: ["a", "b", "c"] }],
     });
     expect(result).toEqual({ ok: false, errors: ["2번 문항의 보기가 4개가 아닙니다."] });
@@ -70,7 +74,7 @@ describe("validateQuizFile", () => {
 
   it("정답 번호가 1~4 정수가 아니면 거부한다", () => {
     for (const correctAnswer of [0, 5, 2.5, "2", null]) {
-      const result = check({ questions: [{ ...validQuestion, correctAnswer }] });
+      const result = check({ title: "제목", questions: [{ ...validQuestion, correctAnswer }] });
       expect(result).toEqual({
         ok: false,
         errors: ["1번 문항의 정답 번호는 1부터 4 사이의 숫자여야 합니다."],
@@ -80,6 +84,7 @@ describe("validateQuizFile", () => {
 
   it("문제·해설·보기가 비어 있으면 거부한다", () => {
     const result = check({
+      title: "제목",
       questions: [
         { ...validQuestion, question: "  " },
         { ...validQuestion, explanation: "" },
@@ -98,7 +103,7 @@ describe("validateQuizFile", () => {
 
   it("문항 순서와 보기 순서를 바꾸지 않는다", () => {
     const second = { ...validQuestion, question: "두 번째", options: ["d", "c", "b", "a"] };
-    const result = check({ questions: [validQuestion, second] });
+    const result = check({ title: "제목", questions: [validQuestion, second] });
     expect(result.ok && result.quiz.questions.map((q) => q.question)).toEqual([
       "1 + 1은?",
       "두 번째",
