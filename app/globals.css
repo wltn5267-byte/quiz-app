@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f7f9;
+  --foreground: #1a1d23;
+  --card: #ffffff;
+  --border: #d9dde3;
+  --hover: #eef0f3;
+  --muted: #5b6270;
+  --primary: #2f5fd0;
+  --primary-foreground: #ffffff;
+  --success: #1c7c46;
+  --danger: #c03030;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111317;
+    --foreground: #eceef1;
+    --card: #1a1d23;
+    --border: #343a45;
+    --hover: #252a32;
+    --muted: #a3aab6;
+    --primary: #6b93f0;
+    --primary-foreground: #0d1220;
+    --success: #4cc382;
+    --danger: #f07272;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-hover: var(--hover);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  word-break: keep-all;
+}
