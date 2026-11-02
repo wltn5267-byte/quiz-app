@@ -27,7 +27,7 @@ describe("question-papers", () => {
 
   it("실제 question-papers 폴더에서 '중학교 정보과목'을 읽는다", () => {
     const papers = loadQuestionPapers();
-    const sample = papers.find((p) => p.id === "sample-questions.json");
+    const sample = papers.find((p) => p.id === "01-sample-questions.json");
     expect(sample?.title).toBe("중학교 정보과목");
     expect(sample?.questions).toHaveLength(10);
   });

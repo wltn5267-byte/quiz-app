@@ -30,7 +30,7 @@ describe("formatScore", () => {
 });
 
 describe("gradeQuiz", () => {
-  // sample-questions.json의 정답 번호와 같습니다.
+  // question-papers/01-sample-questions.json의 정답 번호와 같습니다.
   const questions = [4, 2, 1, 3, 1, 3, 2, 4, 3, 1].map((n) =>
     makeQuestion(n as 1 | 2 | 3 | 4),
   );

@@ -40,7 +40,9 @@
 }
 ```
 
-- 현재 들어 있는 문제지: `question-papers/sample-questions.json` (제목 "중학교 정보과목", 10문항)
+- 현재 들어 있는 문제지
+  - `question-papers/01-sample-questions.json` (제목 "중학교 정보과목", 10문항)
+  - `question-papers/02-high-school-questions.json` (제목 "고등학교 정보과목", 10문항)
 
 ## 홈 화면 (문제지 목록)
 
@@ -135,3 +137,4 @@
 - 학생이 매번 파일을 올리는 불편을 없애려고, 미리 준비한 문제지를 목록에서 고르는 방식으로 바꿨습니다.
 - `sample-questions.json`을 `question-papers` 폴더로 옮기고 `title: "중학교 정보과목"`을 추가했습니다. 문제·보기·정답·해설은 그대로입니다.
 - 학생 업로드 화면과 1MB 제한은 없앴습니다.
+- 이후 "고등학교 정보과목" 문제지를 추가했습니다. 중학교가 목록 위에 오도록 두 파일 이름 앞에 번호를 붙였습니다: `01-sample-questions.json`, `02-high-school-questions.json`

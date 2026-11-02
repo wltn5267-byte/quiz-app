@@ -15,9 +15,9 @@ function check(data: unknown) {
 }
 
 describe("validateQuizFile", () => {
-  it("question-papers/sample-questions.json의 제목과 10문항을 그대로 받아들인다", () => {
+  it("question-papers/01-sample-questions.json의 제목과 10문항을 그대로 받아들인다", () => {
     const text = readFileSync(
-      join(process.cwd(), "question-papers", "sample-questions.json"),
+      join(process.cwd(), "question-papers", "01-sample-questions.json"),
       "utf8",
     );
     const result = validateQuizFile(text);
