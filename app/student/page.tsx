@@ -1,11 +1,10 @@
 import StudentApp from "@/components/student/StudentApp";
-import { loadQuestionPapers } from "@/lib/quiz/papers";
 
+/** 학생 화면. 공개된 문제지는 이름을 입력한 뒤 /api/papers에서 받아옵니다. */
 export default function StudentPage() {
-  const papers = loadQuestionPapers();
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
-      <StudentApp papers={papers} />
+      <StudentApp />
     </main>
   );
 }

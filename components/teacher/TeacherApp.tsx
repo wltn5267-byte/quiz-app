@@ -5,7 +5,8 @@ import Link from "next/link";
 import { FirebaseError } from "firebase/app";
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from "firebase/auth";
 import { getFirebaseAuth, hasFirebaseConfig } from "@/lib/firebase/client";
-import TeacherDashboard, { type TeacherPaper } from "./TeacherDashboard";
+import type { TeacherPaper } from "@/lib/teacher/types";
+import TeacherDashboard from "./TeacherDashboard";
 
 type View =
   | { name: "no-config" }

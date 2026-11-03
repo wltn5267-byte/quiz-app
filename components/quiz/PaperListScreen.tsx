@@ -1,10 +1,10 @@
 "use client";
 
-import type { QuestionPaper } from "@/lib/quiz/types";
+import type { PaperSummary } from "@/lib/quiz/types";
 
 type Props = {
-  papers: QuestionPaper[];
-  onSelect: (paper: QuestionPaper) => void;
+  papers: PaperSummary[];
+  onSelect: (paper: PaperSummary) => void;
 };
 
 export default function PaperListScreen({ papers, onSelect }: Props) {
@@ -30,7 +30,7 @@ export default function PaperListScreen({ papers, onSelect }: Props) {
               >
                 <span className="text-lg font-semibold leading-7">{paper.title}</span>
                 <span className="shrink-0 text-sm text-muted">
-                  {paper.questions.length}문항 ›
+                  {paper.questionCount}문항 ›
                 </span>
               </button>
             </li>

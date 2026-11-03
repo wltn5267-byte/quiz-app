@@ -1,9 +1,9 @@
 "use client";
 
-import type { Answer, Question } from "@/lib/quiz/types";
+import type { Answer, PublicQuestion } from "@/lib/quiz/types";
 
 type Props = {
-  question: Question;
+  question: PublicQuestion;
   index: number;
   total: number;
   chosen: Answer;

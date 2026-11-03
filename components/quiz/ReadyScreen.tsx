@@ -3,11 +3,19 @@
 type Props = {
   title: string;
   questionCount: number;
+  /** 문항을 아직 받아오는 중이면 true */
+  startDisabled?: boolean;
   onStart: () => void;
   onBackToList: () => void;
 };
 
-export default function ReadyScreen({ title, questionCount, onStart, onBackToList }: Props) {
+export default function ReadyScreen({
+  title,
+  questionCount,
+  startDisabled = false,
+  onStart,
+  onBackToList,
+}: Props) {
   return (
     <section className="flex flex-col gap-6">
       <h1 className="text-2xl font-bold">문제를 풀 준비가 되었습니다</h1>
@@ -27,7 +35,8 @@ export default function ReadyScreen({ title, questionCount, onStart, onBackToLis
         <button
           type="button"
           onClick={onStart}
-          className="h-14 flex-1 rounded-xl bg-primary text-lg font-semibold text-primary-foreground hover:opacity-90"
+          disabled={startDisabled}
+          className="h-14 flex-1 rounded-xl bg-primary text-lg font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
         >
           시작
         </button>

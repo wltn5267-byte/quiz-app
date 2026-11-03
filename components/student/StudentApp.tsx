@@ -2,16 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { QuestionPaper } from "@/lib/quiz/types";
 import QuizApp from "@/components/quiz/QuizApp";
 import NameEntryScreen from "./NameEntryScreen";
 
-type Props = {
-  papers: QuestionPaper[];
-};
-
 /** 학생 이름을 받은 뒤 문제풀이로 넘어갑니다. 이름은 저장하지 않으므로 새로고침하면 다시 입력합니다. */
-export default function StudentApp({ papers }: Props) {
+export default function StudentApp() {
   const [name, setName] = useState<string | null>(null);
 
   if (name === null) {
@@ -29,7 +24,7 @@ export default function StudentApp({ papers }: Props) {
           첫 화면으로
         </Link>
       </div>
-      <QuizApp papers={papers} />
+      <QuizApp studentName={name} />
     </div>
   );
 }
