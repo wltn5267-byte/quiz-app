@@ -8,7 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - 요구사항의 기준 문서는 [PRD.md](PRD.md)입니다. 작업 전에 반드시 읽습니다. PRD.md 끝의 "변경 기록"에 초기 버전(학생 파일 업로드)과 현재 버전(목록 선택)의 차이가 있습니다.
 - 기술 구성: Next.js + TypeScript, Vercel 배포, PC와 휴대폰 모두 지원
-- 현재 상태: 1일차 앱을 목록 선택 방식으로 바꿨고, 이 컴퓨터에서 실행해 확인했습니다. Vercel 배포는 하지 않았습니다(첫 커밋 `24942ef`는 업로드 방식인 초기 버전).
+- 현재 상태: 1일차 앱을 목록 선택 방식으로 바꿨고, 이 컴퓨터에서 실행해 확인했습니다(첫 커밋 `24942ef`는 업로드 방식인 초기 버전).
+- Vercel: 계정 `wltn5267-8646`(팀 `wltn5267`, 무료 Hobby), 프로젝트 `quiz-app`(Framework는 `nextjs`로 지정). 정식 주소는 https://quiz-app-zeta-ruddy.vercel.app 이고 로그인 없이 열립니다. 배포마다 생기는 개별 주소는 Vercel 보호 기능 때문에 로그인이 필요합니다. 다시 배포할 때는 `vercel deploy --prod`를 씁니다(`.vercel` 폴더로 연결됨, Git 자동 배포 연결 없음).
+- 이 컴퓨터 이름(연수실1-24)에 한글이 있어 `vercel login`이 오류로 멈춥니다. 다시 로그인해야 하면 `NODE_OPTIONS="--require C:/Users/user/.vercel-fix/hostname-ascii.cjs"`를 붙여 실행합니다. Git Bash에서 `vercel api /v9/...`처럼 `/`로 시작하는 주소를 넘기면 Windows 경로로 바뀌어 실패하므로 PowerShell에서 실행합니다.
 - GitHub: 공개 저장소 https://github.com/wltn5267-byte/quiz-app (`origin`, 브랜치 `main`, 계정 `wltn5267-byte`). GitHub CLI(`gh`)는 `C:\Program Files\GitHub CLI`에 설치되어 있습니다. 공개 저장소이므로 문제지의 정답·해설과 커밋 이메일이 누구에게나 보입니다. 저장소에는 Vercel 등 자동 배포 연결이 없습니다.
 - 확인된 작업 환경: Windows 11, Node.js v26.13.0, npm 11.20.0, Git 2.56.0, Next.js 16.4.3 (Turbopack, `cacheComponents` 켜짐)
 - 이 Next.js 버전은 예전 버전과 다른 점이 있습니다. 코드를 쓰기 전에 [AGENTS.md](AGENTS.md)의 안내대로 `node_modules/next/dist/docs/`를 확인합니다. AGENTS.md는 `next dev`가 다시 써 넣는 파일이므로 직접 고치지 않습니다.
