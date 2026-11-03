@@ -30,8 +30,10 @@ npm run build    # 배포용 빌드 확인
 
 ## 구조
 
-- `app/page.tsx`(서버 쪽)가 `loadQuestionPapers()`로 `question-papers/*.json`을 읽어 검사한 뒤, 문제지 목록을 [components/quiz/QuizApp.tsx](components/quiz/QuizApp.tsx)에 넘깁니다. 파일 읽기는 빌드할 때 미리 실행되므로, 배포본에서 문제지를 바꾸려면 다시 빌드·배포해야 합니다. 개발용 실행에서는 새로고침하면 바로 반영됩니다.
-- `QuizApp`이 단계(`list → ready → solving → result`)와 고른 답을 기억하고, 단계마다 `PaperListScreen`, `ReadyScreen`, `QuestionScreen`, `ResultScreen` 중 하나를 보여줍니다. 내용은 저장하지 않으므로 새로고침하면 목록으로 돌아갑니다.
+- `app/page.tsx`는 첫 화면으로, "교사로 시작하기"(`/teacher`)와 "학생으로 시작하기"(`/student`)만 있습니다. 로그인이 없어 누구나 교사 화면에 들어갈 수 있습니다.
+- `app/teacher/page.tsx`는 교사 화면 기본 구조입니다. 문제지 목록(제목·문항 수)과, 아직 연결 안 된 "문제 등록"·"학생 풀이 결과" 칸이 있습니다.
+- `app/student/page.tsx`(서버 쪽)가 `loadQuestionPapers()`로 `question-papers/*.json`을 읽어 검사한 뒤 [components/student/StudentApp.tsx](components/student/StudentApp.tsx)에 넘깁니다. `StudentApp`은 이름 입력(`NameEntryScreen`, 검사는 `lib/quiz/student.ts`)을 받은 뒤 문제지 목록을 [components/quiz/QuizApp.tsx](components/quiz/QuizApp.tsx)에 넘깁니다. 이름은 저장하지 않습니다. 파일 읽기는 빌드할 때 미리 실행되므로, 배포본에서 문제지를 바꾸려면 다시 빌드·배포해야 합니다. 개발용 실행에서는 새로고침하면 바로 반영됩니다.
+- `QuizApp`이 단계(`list → ready → solving → result`)와 고른 답을 기억하고, 단계마다 `PaperListScreen`, `ReadyScreen`, `QuestionScreen`, `ResultScreen` 중 하나를 보여줍니다. 내용은 저장하지 않으므로 새로고침하면 이름 입력부터 다시 시작합니다.
 - 화면과 상관없는 규칙은 `lib/quiz/`에 따로 있습니다. 2일차에도 그대로 다시 씁니다.
   - `papers.ts`: 폴더 읽기(`loadQuestionPapers`)와 파일 이름 순서 정렬·검사(`parseQuestionPapers`). 잘못된 파일은 목록에서 빼고 서버 콘솔에 이유를 남깁니다. 파일 경로는 `join(process.cwd(), "question-papers", …)`처럼 폴더를 고정해서 씁니다. 경로를 변수로 받으면 빌드할 때 프로젝트 전체를 묶는다는 경고가 납니다.
   - `validate.ts`: 문제지 한 개의 형식 검사(title 포함). 한국어 오류 문구를 만듭니다.
